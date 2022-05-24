@@ -1,4 +1,4 @@
-﻿version "3.8"
+﻿version: "3.8"
 
 services:
   mmapi:
@@ -8,3 +8,35 @@ services:
     command: uvicorn --reload --host 0.0.0.0 --port 8181 mmapi.main:app
     volumes:
       - .:/workspace:z
+    restart: unless-stopped
+  mmdb:
+    image: lscr.io/linuxserver/mariadb:latest
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Chicago
+      - MYSQL_DATABASE=mm
+      - MYSQL_USER=mmu
+#      - MYSQL_PASSWORD=
+    volumes:
+      - /opt/mmapi:/config
+    ports:
+      - 3306:3306
+    restart: unless-stopped
+  mmswag:
+    image: lscr.io/linuxserver/swag:latest
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Chicago
+      - URL=lordlabs.club
+      - VALIDATION=dns
+      - DNSPLUGIN=cloudflare
+      - EMAIL=lordblake115@gmail.com
+      - STAGING=true
+    volumes:
+      - /opt/mmapi:/config
+    ports:
+      - 443:443
+      - 8181:8181
+    restart: unless-stopped
